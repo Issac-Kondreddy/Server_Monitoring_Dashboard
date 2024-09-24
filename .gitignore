@@ -1,0 +1,15 @@
+#virtual Env files
+smv/
+
+#python compiled files
+__pycache__/
+*.pyc
+
+#django migrations
+*/migrations/
+
+#database
+db.sqlite3
+
+#VS Code Settings
+.vscode/
