@@ -42,16 +42,20 @@ def network_usage(request):
     })
 @api_view(['GET'])
 def docker_containers(request):
-    client = docker.from_env()  # Connect to Docker
-    containers = client.containers.list()  # List all running containers
-    container_info = []
-    for container in containers:
-        container_info.append({
-            'ID': container.short_id,
-            'Name': container.name,
-            'Status': container.status
-        })
-    return Response({'Containers': container_info})
+    try:
+        client = docker.from_env()  # Connect to Docker
+        containers = client.containers.list()  # List all running containers
+        container_info = []
+        for container in containers:
+            container_info.append({
+                'ID': container.short_id,
+                'Name': container.name,
+                'Status': container.status
+            })
+        return Response({'Containers': container_info})
+    except docker.errors.DockerException as e:
+        return Response({'Containers': []})  # If Docker is not installed or not running, return empty list
+
 
 @api_view(['GET'])
 def cpu_temperature(request):
@@ -60,8 +64,10 @@ def cpu_temperature(request):
             temp_raw = f.read().strip()
             temp_celsius = int(temp_raw) / 1000.0  # Convert from millidegrees
             return Response({'CPU Temperature': f'{temp_celsius}°C'})
-    except Exception as e:
-        return Response({'CPU Temperature': 'Not Available', 'error': str(e)})
+    except FileNotFoundError as e:
+        return Response({'CPU Temperature': 'Not Available', 'error': str(e.__class__.__name__)})
+
+
 
 
 
@@ -107,7 +113,6 @@ def network_speed(request):
         'Download Speed': f'{download_speed:.2f} MB/s'
     })
 
-
 @api_view(['GET'])
 def process_monitoring(request):
     # Give psutil time to gather CPU usage information
@@ -115,19 +120,19 @@ def process_monitoring(request):
 
     # Get the top 5 processes by CPU usage
     processes = []
-    for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
+    for proc in psutil.process_iter(['pid', 'name']):
         try:
+            # Only append the process if cpu_percent and memory_percent are accessible
             processes.append({
                 'pid': proc.info['pid'],
                 'name': proc.info['name'],
-                'cpu': proc.info['cpu_percent'] if proc.info['cpu_percent'] is not None else 0,
-                'memory': proc.info['memory_percent'] if proc.info['memory_percent'] is not None else 0,
+                'cpu': proc.cpu_percent(),
+                'memory': proc.memory_percent(),
             })
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             # Ignore processes that no longer exist or can't be accessed
             pass
-    
+
     # Sort by CPU usage and take the top 5
     processes = sorted(processes, key=lambda p: p['cpu'], reverse=True)[:5]
     return Response(processes)
-
