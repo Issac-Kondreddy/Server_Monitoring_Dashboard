@@ -1,0 +1,73 @@
+/* Body Styling */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container for overall layout */
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+/* Heading Styling */
+.heading {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #ffffff;
+    margin-bottom: 40px;
+}
+
+/* Flexbox for Grid Layout */
+.grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Card Styling */
+.block {
+    background-color: #1e1e1e;
+    flex: 1 1 calc(33.333% - 20px); /* Three blocks per row */
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    min-width: 280px;
+}
+
+/* Metric Title */
+.metric-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: #80cbc4;
+    display: flex;
+    align-items: center;
+}
+
+/* Metric Value */
+.metric-value {
+    font-size: 2.2rem;
+    color: #ffb74d;
+    margin-bottom: 20px;
+}
+
+/* Canvas Styling for Graphs */
+canvas {
+    background-color: #2a2a2a;
+    border-radius: 8px;
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+    .grid {
+        flex-direction: column;
+    }
+    .block {
+        width: 100%;
+    }
+}

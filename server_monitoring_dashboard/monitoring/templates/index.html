@@ -1,137 +1,85 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>Server Monitoring Dashboard</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            color: #007BFF;
-        }
-        
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .metric-title {
-            font-size: 1.5rem;
-        }
-        
-        .metric-value {
-            font-size: 2.5rem;
-            color: #28a745;
-        }
-        
-        .metric:last-child {
-            border-bottom: none;
-        }
-        
-        #docker p {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        
-    </style>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <div class="container">
+        <h1 class="heading">Server Monitoring Dashboard</h1>
+        
+        <div class="grid">
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-microchip"></i> CPU Usage</div>
+                <div class="metric-value" id="cpu">Loading...</div>
+                <canvas id="cpuChart" width="400" height="200"></canvas>
+            </div>
 
-<div class="container">
-    <h1>Server Monitoring Dashboard</h1>
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-memory"></i> Memory Usage</div>
+                <div class="metric-value" id="memory">Loading...</div>
+                <canvas id="memoryChart" width="400" height="200"></canvas>
+            </div>
 
-    <div class="metric">
-        <div class="metric-title">CPU Usage</div>
-        <div class="metric-value" id="cpu">Loading...</div>
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-hdd"></i> Disk Usage</div>
+                <div class="metric-value" id="disk">Loading...</div>
+                <canvas id="diskChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-network-wired"></i> Network Usage</div>
+                <div class="metric-value" id="network">Loading...</div>
+                <canvas id="networkChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-tachometer-alt"></i> Network Speed</div>
+                <div class="metric-value" id="networkSpeed">Loading...</div>
+                <canvas id="networkSpeedChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-tasks"></i> Top Processes</div>
+                <div id="processes">Loading...</div>
+            </div>
+
+            <div class="block">
+                <div class="metric-title"><i class="fab fa-docker"></i> Docker Containers</div>
+                <table id="dockerTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dockerContainers">
+                        <tr><td colspan="3">Loading...</td></tr>
+                    </tbody>
+                </table>
+                <canvas id="dockerChart" width="400" height="200"></canvas>
+
+            </div>
+
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-thermometer-half"></i> CPU Temperature</div>
+                <div class="metric-value" id="cpuTemp">Loading...</div>
+                <canvas id="cpuTempChart" width="400" height="200"></canvas>
+            </div>
+
+            <div class="block">
+                <div class="metric-title"><i class="fas fa-fan"></i> Fan Speed</div>
+                <div class="metric-value" id="fanSpeed">Loading...</div>
+            </div>
+        </div>
     </div>
 
-    <div class="metric">
-        <div class="metric-title">Memory Usage</div>
-        <div class="metric-value" id="memory">Loading...</div>
-    </div>
-
-    <div class="metric">
-        <div class="metric-title">Disk Usage</div>
-        <div class="metric-value" id="disk">Loading...</div>
-    </div>
-
-    <div class="metric">
-        <div class="metric-title">Network Usage</div>
-        <div class="metric-value" id="network">Loading...</div>
-    </div>
-
-    <div class="metric">
-        <div class="metric-title">Docker Containers</div>
-        <div id="docker">Loading...</div>
-    </div>
-</div>
-
-<script>
-    async function fetchData() {
-        try {
-            // Fetch CPU Usage
-            const cpuResponse = await fetch('/api/cpu/');
-            const cpuData = await cpuResponse.json();
-            document.getElementById('cpu').textContent = cpuData['CPU Storage'] + '%';
-
-            // Fetch Memory Usage
-            // Fetch Memory Usage
-            const memoryResponse = await fetch('/api/memory/');
-            const memoryData = await memoryResponse.json();
-            document.getElementById('memory').textContent = memoryData['Memory Usage'] + '%';
-
-
-            // Fetch Disk Usage
-            const diskResponse = await fetch('/api/disk/');
-            const diskData = await diskResponse.json();
-            document.getElementById('disk').textContent = diskData['Disk Usage'] + '%';
-
-            // Fetch Network Usage
-            const networkResponse = await fetch('/api/network/');
-            const networkData = await networkResponse.json();
-            document.getElementById('network').textContent = 'Sent: ' + networkData['Bytes Sent (MB)'] + ' MB, Received: ' + networkData['Bytes Received (MB)'] + ' MB';
-
-            // Fetch Docker Containers
-            const dockerResponse = await fetch('/api/docker/');
-            const dockerData = await dockerResponse.json();
-            let containersHTML = '';
-            dockerData['Containers'].forEach(container => {
-                containersHTML += `<p>ID: ${container.ID}, Name: ${container.Name}, Status: ${container.Status}</p>`;
-            });
-            document.getElementById('docker').innerHTML = containersHTML || 'No Containers Running';
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
-
-    // Fetch data when the page loads
-    fetchData();
-    // Refresh data every 5 seconds
-    setInterval(fetchData, 5000);
-</script>
-
+    <script src="{% static 'js/script.js' %}"></script> <!-- Script loaded at the end of the body -->
 </body>
 </html>
